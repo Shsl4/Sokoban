@@ -135,6 +135,14 @@ class Game {
 
   }
 
+  Operations lastOp() {
+
+    if(moves.isEmpty) return Operations.none;
+
+    return moves.last.op;
+
+  }
+
   bool undo(){
 
     if(moves.isEmpty) return false;

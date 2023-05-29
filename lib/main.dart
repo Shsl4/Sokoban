@@ -35,8 +35,6 @@ class MyHomePage extends StatefulWidget {
 
 }
 
-
-//La classe principale
 class _MyHomePageState extends State<MyHomePage> {
 
   Game game = Game();

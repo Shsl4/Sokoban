@@ -23,7 +23,10 @@ class Resources {
     return _loaded;
   }
 
-  ui.Image? _player;
+  ui.Image? _playerRight0;
+  ui.Image? _playerLeft0;
+  ui.Image? _playerTop0;
+  ui.Image? _playerDown0;
   ui.Image? _box;
   ui.Image? _ground;
   ui.Image? _wall;
@@ -36,7 +39,10 @@ class Resources {
 
     if(valid()) return;
 
-    _player = await _loadImage('assets/sprites/droite_0.png');
+    _playerRight0 = await _loadImage('assets/sprites/droite_0.png');
+    _playerLeft0 = await _loadImage('assets/sprites/gauche_0.png');
+    _playerTop0 = await _loadImage('assets/sprites/haut_0.png');
+    _playerDown0 = await _loadImage('assets/sprites/bas_0.png');
     _box = await _loadImage('assets/sprites/caisse.png');
     _ground = await _loadImage('assets/sprites/sol.png');
     _wall = await _loadImage('assets/sprites/bloc.png');
@@ -62,8 +68,20 @@ class Resources {
     return index >= 0 && index < _levels.length;
   }
 
-  ui.Image playerTexture() {
-    return _player!;
+  ui.Image playerRight() {
+    return _playerRight0!;
+  }
+
+  ui.Image playerLeft() {
+    return _playerLeft0!;
+  }
+
+  ui.Image playerTop() {
+    return _playerTop0!;
+  }
+
+  ui.Image playerDown() {
+    return _playerDown0!;
   }
 
   ui.Image boxTexture() {

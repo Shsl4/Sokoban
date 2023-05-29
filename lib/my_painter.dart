@@ -38,10 +38,7 @@ class MyPainter extends CustomPainter {
           case TileType.Void:
           case TileType.Ground:
           case TileType.Box:
-            break;
-
           case TileType.PlayerStart:
-            canvas.drawImageRect(resources.playerTexture(), srcRect, destRect, Paint());
             break;
 
           case TileType.Wall:
@@ -55,6 +52,7 @@ class MyPainter extends CustomPainter {
           case TileType.Hole:
             canvas.drawImageRect(resources.holeTexture(), srcRect, destRect, Paint());
             break;
+
         }
 
         ++x;
@@ -75,7 +73,27 @@ class MyPainter extends CustomPainter {
     var pos = game.playerPosition();
     Rect destRect = Rect.fromLTWH(50.0 * pos.x, 50.0 * pos.y, 50, 50);
 
-    canvas.drawImageRect(resources.playerTexture(), srcRect, destRect, Paint());
+    canvas.drawImageRect(selectPlayerTexture(), srcRect, destRect, Paint());
+
+  }
+
+  dynamic selectPlayerTexture() {
+
+    Operations op = game.lastOp();
+
+    switch(op){
+
+      case Operations.none:
+        return resources.playerRight();
+      case Operations.up:
+        return resources.playerTop();
+      case Operations.down:
+        return resources.playerDown();
+      case Operations.left:
+        return resources.playerLeft();
+      case Operations.right:
+        return resources.playerRight();
+    }
 
   }
 
