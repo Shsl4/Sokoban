@@ -1,5 +1,5 @@
-import 'package:sokoban/level.dart';
-import 'package:sokoban/resources.dart';
+import 'level.dart';
+import 'resources.dart';
 
 enum Operations{
   none,
@@ -21,6 +21,7 @@ class Move {
 class Game {
 
   int levelIndex = -1;
+  Function()? moveCallback;
   List<Move> moves = [];
   Vector2D _playerPosition = Vector2D.zero();
   List<Vector2D> _boxPositions = [];
@@ -39,11 +40,17 @@ class Game {
   bool loadLevel(int index){
 
     try{
+
       _currentState = Resources().level(index);
       _playerPosition = Vector2D(_currentState!.playerStart.x, _currentState!.playerStart.y);
       _boxPositions = List.from(_currentState!.boxStarts);
       levelIndex = index;
       moves = [];
+
+      if(moveCallback != null){
+        moveCallback!();
+      }
+
     }
     catch(e){
       return false;
@@ -131,6 +138,10 @@ class Game {
 
     moves.add(Move(op, push));
 
+    if(moveCallback != null){
+      moveCallback!();
+    }
+
     return true;
 
   }
@@ -159,6 +170,11 @@ class Game {
     _playerPosition += -offset;
 
     moves.removeAt(moves.length - 1);
+
+    if(moveCallback != null){
+      moveCallback!();
+    }
+
     return true;
 
   }

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
-import 'package:sokoban/level.dart';
-import 'package:sokoban/game.dart';
+import 'level.dart';
+import 'game.dart';
 
 class Resources {
 

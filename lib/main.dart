@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sokoban/resources.dart';
-import 'package:sokoban/my_painter.dart';
-import 'package:sokoban/game.dart';
+import 'resources.dart';
+import 'my_painter.dart';
+import 'game.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,16 +21,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Niveau 1'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
 
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  String title;
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -48,17 +48,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void reloadLevel(){
     game.loadLevel(currentLevel);
-    widget.title = 'Niveau ${currentLevel + 1}';
     setState((){});
   }
 
   void onDrag(DragUpdateDetails details){
-    print(details.delta);
+    //print(details.delta);
   }
 
   void onKey(RawKeyEvent event){
 
-    if(event is RawKeyDownEvent){
+    if(event is RawKeyDownEvent && !event.repeat){
 
       if(event.logicalKey.keyLabel == 'Arrow Down'){
         game.applyMove(Operations.down);
@@ -88,9 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
         currentLevel++;
         reloadLevel();
       }
-
-      setState(() {});
-
+      
     }
 
   }
@@ -101,17 +98,24 @@ class _MyHomePageState extends State<MyHomePage> {
         focusNode: FocusNode(),
         onKey: onKey,
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title),
-          ),
-          //Le widget principal est la zone de dessin (un canvas) : on lui passe la hauteur de l'écran moins la hauteur de l'appBar et la hauteur de la barre de notif, la largeur de l'écran et les ressources
-          body: GestureDetector(
+        body: GestureDetector(
             onPanUpdate: onDrag,
             child: CustomPaint(
-                painter: MyPainter(MediaQuery.of(context).size.height-56-24, MediaQuery.of(context).size.width)
+                child: Container(),
+                painter: MyPainter()
             ),
           ),
         )
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    const duration = Duration(milliseconds: 1000 ~/ 60);
+    Timer.periodic(duration, (timer) {
+      setState(() {
+      });
+    });
   }
 }

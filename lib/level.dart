@@ -1,4 +1,6 @@
 
+import 'dart:ui';
+
 enum TileType{
   Void,
   PlayerStart,
@@ -23,9 +25,23 @@ class Vector2D {
 
   Vector2D operator +(Vector2D other) => Vector2D(x + other.x, y + other.y);
 
+  Vector2D operator -(Vector2D other) => Vector2D(x - other.x, y - other.y);
+
   Vector2D operator -() => Vector2D(-x, -y);
 
-  Vector2D operator *(int value) => Vector2D(x * value, y * value);
+  Vector2D operator *(Object value) {
+    if(value is int){
+      return Vector2D(x * value, y * value);
+    }
+    if(value is double){
+      return Vector2D((x * value).floor(), (y * value).floor());
+    }
+    throw Exception('Invalid operand');
+  }
+
+  Offset toOffset() {
+    return Offset(x.toDouble(), y.toDouble());
+  }
 
   @override
   int get hashCode => x.hashCode ^ y.hashCode;

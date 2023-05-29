@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:sokoban/resources.dart';
-import 'package:sokoban/level.dart';
-import 'package:sokoban/game.dart';
+import 'resources.dart';
+import 'level.dart';
+import 'game.dart';
+import 'camera.dart';
+import 'particle.dart';
 
 class MyPainter extends CustomPainter {
 
-  double height;
-  double width;
-  Game game = Game();
-  Resources resources = Resources();
-
-  MyPainter(this.height, this.width);
+  static final Game game = Game();
+  static final Resources resources = Resources();
+  static final Camera camera = Camera();
+  static final Paint backPaint = Paint()..color = Colors.black;
+  static final ParticleManager particleManager = ParticleManager(100);
 
   @override
   void paint(Canvas canvas, Size size) {
 
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), backPaint);
+
     if(!game.levelLoaded()) return;
+
+    particleManager.paint(canvas, size);
+    camera.translateView(canvas, size);
+    drawTiles(canvas);
+
+  }
+
+  void drawTiles(Canvas canvas){
 
     Rect srcRect = const Rect.fromLTWH(0, 0, 128, 128);
 
     Level level = game.level();
+
     int x = 0;
     int y = 0;
 
@@ -70,8 +82,7 @@ class MyPainter extends CustomPainter {
       canvas.drawImageRect(resources.boxTexture(), srcRect, destRect, Paint());
     }
 
-    var pos = game.playerPosition();
-    Rect destRect = Rect.fromLTWH(50.0 * pos.x, 50.0 * pos.y, 50, 50);
+    Rect destRect = Rect.fromLTWH(camera.renderPosition.dx * 50.0, camera.renderPosition.dy * 50.0, 50, 50);
 
     canvas.drawImageRect(selectPlayerTexture(), srcRect, destRect, Paint());
 
