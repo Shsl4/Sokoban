@@ -8,6 +8,10 @@ class Camera extends FAnimation {
   Offset targetPosition = Offset.zero;
   Offset currentPosition = Offset.zero;
   Offset renderPosition = Offset.zero;
+  Offset drawOffset = Offset.zero;
+
+  double scaling = 1.0;
+
   static final Game game = Game();
 
   Camera(){
@@ -28,12 +32,10 @@ class Camera extends FAnimation {
 
     update(1.0 / 60.0);
 
-    const scaling = 1.5;
-
     canvas.scale(scaling);
 
-    Offset center = Utilities.roundUpVec(Offset(size.width / 2.0 / scaling, size.height / 2.0 / scaling), 50);
-    Offset offset = center - renderPosition * 50.0;
+    Offset center = (Offset(size.width / 2.0 / scaling, size.height / 2.0 / scaling));
+    Offset offset = center - renderPosition * 50.0 + drawOffset;
 
     canvas.translate(offset.dx, offset.dy);
 

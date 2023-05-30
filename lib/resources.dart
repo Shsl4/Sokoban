@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
@@ -120,7 +121,7 @@ class Resources {
   }
 
   Future<List<dynamic>> _loadJson(String filePath) async {
-    var input = await File(filePath).readAsString();
+    var input = await rootBundle.loadString(filePath);
     return jsonDecode(input);
   }
 

@@ -33,10 +33,6 @@ class Game {
 
   factory Game() { return _instance; }
 
-  void reset(){
-    loadLevel(levelIndex);
-  }
-
   bool loadLevel(int index){
 
     try{
@@ -58,6 +54,10 @@ class Game {
 
     return true;
 
+  }
+
+  void reset(){
+    loadLevel(levelIndex);
   }
 
   TileType tile(Vector2D v){
