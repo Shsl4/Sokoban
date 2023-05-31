@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sokoban/autorefresh.dart';
 
+import 'overlay_menu.dart';
 import 'resources.dart';
 import 'my_painter.dart';
 import 'game.dart';
@@ -32,10 +34,10 @@ class MyApp extends StatelessWidget {
 
 class TapView extends StatelessWidget {
 
-  Function(Operations) tap;
-  Function() longPress;
+  final Function(Operations) tap;
+  final Function() longPress;
 
-  TapView(this.tap, this.longPress);
+  const TapView(this.tap, this.longPress, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -91,15 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState((){});
   }
 
-  void onDrag(DragUpdateDetails details){
-    MyPainter.camera.drawOffset += details.delta;
-  }
 
   void onScale(ScaleUpdateDetails details){
-
-    // MyPainter.camera.drawOffset += details.focalPointDelta;
-    // RMyPainter.camera.scaling = details.scale;
-
+    MyPainter.camera.addOffset(details.focalPointDelta);
   }
 
   void receiveOp(Operations op){
@@ -162,36 +158,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
-  Widget buttons() {
-
-    return Row(
-      children: [
-        Spacer(),
-        ElevatedButton(
-          onPressed: () => pauseMenu(false),
-          child: Text('Resume'),
-          style: ButtonStyle(
-            minimumSize: MaterialStatePropertyAll<Size>(Size(125, 40)),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-          ),
-        ),
-        Spacer(),
-        ElevatedButton(
-          onPressed: () => {},
-          child: Text('Exit'),
-          style: ButtonStyle(
-            minimumSize: MaterialStatePropertyAll<Size>(Size(125, 40)),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-          ),
-        ),
-        Spacer()
-      ],
+  Widget generatePainter(){
+    return CustomPaint(
+        painter: MyPainter(),
+        child: Container()
     );
-
   }
-
 
   List<Widget> makeChildren() {
 
@@ -200,10 +172,10 @@ class _MyHomePageState extends State<MyHomePage> {
     display.add(Scaffold(
         body: GestureDetector(
           onScaleUpdate: onScale,
-          child: CustomPaint(
-              child: Container(),
-              painter: MyPainter()
-          ),
+          child: AutoRefresh(
+            refreshRate: 60,
+            widgetGenerator: generatePainter
+          )
         )
     ));
 
@@ -214,51 +186,29 @@ class _MyHomePageState extends State<MyHomePage> {
       child: ElevatedButton(
           onLongPress: () => game.reset(),
           onPressed: () => game.undo(),
-          child: Icon(Icons.rotate_left),
           style: ButtonStyle(
             splashFactory: NoSplash.splashFactory,
             shape:MaterialStatePropertyAll(RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12), // <-- Radius
             )),
-            minimumSize: MaterialStatePropertyAll<Size>(Size(75, 75)),
+            minimumSize: const MaterialStatePropertyAll<Size>(Size(75, 75)),
             foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
             backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
             shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
             overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
-          )
+          ),
+          child: const Icon(Icons.rotate_left)
       )
     ));
 
     if(paused){
 
-      display.add(Stack(
-        children: [
-          Container(color: Color.fromARGB(200, 0, 0, 0)),
-          Center(
-            child: Stack(
-              children: [
-                Container(
-                  width: 350,
-                  height: 200,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red, width: 3),
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.all(Radius.circular(15))),
-                  child: Column(
-                    children: [
-                      Spacer(),
-                      Text('Menu', style: TextStyle(color: Colors.red, decoration: TextDecoration.none)),
-                      Spacer(),
-                      buttons(),
-                      Spacer()
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ));
+      display.add(OverlayMenu(
+          title: 'Paused',
+          leftButtonAction: () => pauseMenu(false),
+          leftButtonText: 'Continue',
+          rightButtonText: 'Exit')
+      );
 
     }
 
@@ -279,12 +229,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    const duration = Duration(milliseconds: 1000 ~/ 60);
-    Timer.periodic(duration, (timer) {
-      setState(() {});
-    });
-  }
 }
