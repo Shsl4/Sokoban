@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'utilities.dart';
+import 'package:sokoban/utilities/utilities.dart';
 
 class Particle {
 

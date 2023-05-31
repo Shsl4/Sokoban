@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
-import 'resources.dart';
-import 'level.dart';
-import 'game.dart';
-import 'camera.dart';
-import 'particle.dart';
+import 'package:sokoban/game/game.dart';
+import 'package:sokoban/game/level.dart';
+import 'package:sokoban/ui/resources.dart';
+import 'package:sokoban/ui/particle.dart';
+import 'package:sokoban/ui/camera.dart';
 
-class MyPainter extends CustomPainter {
+class LevelPainter extends CustomPainter {
 
   static final Game game = Game();
-  static final Resources resources = Resources();
+  static final Resources resources = Resources.instance();
   static final Camera camera = Camera();
   static final Paint backPaint = Paint()..color = Colors.black;
   static final ParticleManager particleManager = ParticleManager(100);
+  static final SpriteSequenceAnimator playerAnim = SpriteSequenceAnimator(resources.playerRight(), 0.25);
+
+  final double dt;
+
+  LevelPainter(this.dt);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -20,8 +25,9 @@ class MyPainter extends CustomPainter {
 
     if(!game.levelLoaded()) return;
 
+    playerAnim.update(dt);
     particleManager.paint(canvas, size);
-    camera.translateView(canvas, size);
+    camera.translateView(canvas, size, dt);
     drawTiles(canvas);
 
   }
@@ -41,27 +47,27 @@ class MyPainter extends CustomPainter {
 
         Rect destRect = Rect.fromLTWH(50.0 * x, 50.0 * y, 50, 50);
 
-        if(tile != TileType.Void && tile != TileType.Hole){
+        if(tile != TileType.empty && tile != TileType.hole){
           canvas.drawImageRect(resources.groundTexture(), srcRect, destRect, Paint());
         }
 
         switch(tile){
 
-          case TileType.Void:
-          case TileType.Ground:
-          case TileType.Box:
-          case TileType.PlayerStart:
+          case TileType.empty:
+          case TileType.ground:
+          case TileType.box:
+          case TileType.playerStart:
             break;
 
-          case TileType.Wall:
+          case TileType.wall:
             canvas.drawImageRect(resources.wallTexture(), srcRect, destRect, Paint());
             break;
 
-          case TileType.Target:
+          case TileType.target:
             canvas.drawImageRect(resources.targetTexture(), srcRect, destRect, Paint());
             break;
 
-          case TileType.Hole:
+          case TileType.hole:
             canvas.drawImageRect(resources.holeTexture(), srcRect, destRect, Paint());
             break;
 
@@ -77,27 +83,21 @@ class MyPainter extends CustomPainter {
 
     }
 
-    for(var pos in game.boxes()){
-      Rect destRect = Rect.fromLTWH(50.0 * pos.x, 50.0 * pos.y, 50, 50);
-      canvas.drawImageRect(resources.boxTexture(), srcRect, destRect, Paint());
-    }
+    game.boxManager.renderBoxes(canvas, dt);
 
-    Rect destRect = Rect.fromLTWH(camera.renderPosition.dx * 50.0, camera.renderPosition.dy * 50.0, 50, 50);
-
-    canvas.drawImageRect(selectPlayerTexture(), srcRect, destRect, Paint());
+    Rect destRect = Rect.fromLTWH(camera.renderPosition.x * 50.0, camera.renderPosition.y * 50.0, 50, 50);
+    canvas.drawImageRect(playerAnim.currentFrame(), srcRect, destRect, Paint());
 
   }
 
-  dynamic selectPlayerTexture() {
-
-    Operations op = game.lastOp();
+  static SpriteSequence selectPlayerTexture(Operations op) {
 
     switch(op){
 
       case Operations.none:
         return resources.playerRight();
       case Operations.up:
-        return resources.playerTop();
+        return resources.playerUp();
       case Operations.down:
         return resources.playerDown();
       case Operations.left:
@@ -106,6 +106,11 @@ class MyPainter extends CustomPainter {
         return resources.playerRight();
     }
 
+  }
+
+  static void notifyMove(Operations op) {
+    playerAnim.updateSequence(selectPlayerTexture(op));
+    playerAnim.restart();
   }
 
   @override

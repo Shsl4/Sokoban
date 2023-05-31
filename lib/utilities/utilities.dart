@@ -1,9 +1,25 @@
 import 'dart:math';
-import 'dart:ui';
+import 'package:sokoban/game/vector2d.dart';
 
 class Utilities {
 
   static final random = Random.secure();
+
+  static double easeIn(double t)
+  {
+    return t * t;
+  }
+
+  static double spike(double t) {
+
+    if (t <= 0.5) {
+      return easeIn(t / 0.5);
+    }
+
+    return easeIn(flipd(t)/ 0.5);
+
+  }
+
 
   static double randomDouble(double minValue, double maxValue, int precision) {
 
@@ -20,16 +36,16 @@ class Utilities {
     return 1.0 - v;
   }
 
-  static Offset easeInOut(Offset from, Offset to, double t, int easePower) {
+  static Vector2d easeInOut(Vector2d from, Vector2d to, double t, int easePower) {
     return lerpVec(from, to, lerpd(pow(t, easePower), flipd(pow(flipd(t), easePower)), t));
   }
 
-  static Offset lerpVec(Offset from, Offset to, double t){
+  static Vector2d lerpVec(Vector2d from, Vector2d to, double t){
     return from + (to - from) * t;
   }
 
-  static Offset roundUpVec(Offset off, int multiple){
-    return Offset(Utilities.roundUp(off.dx, multiple), Utilities.roundUp(off.dy, multiple));
+  static Vector2d roundUpVec(Vector2d off, int multiple){
+    return Vector2d(Utilities.roundUp(off.x, multiple), Utilities.roundUp(off.y, multiple));
   }
 
   static double roundUp(double numToRound, int multiple) {

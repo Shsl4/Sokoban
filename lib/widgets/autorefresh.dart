@@ -1,12 +1,10 @@
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class AutoRefresh extends StatefulWidget {
 
   final int refreshRate;
-  final Widget Function() widgetGenerator;
+  final Widget Function(double) widgetGenerator;
 
   const AutoRefresh({super.key, required this.refreshRate, required this.widgetGenerator});
 
@@ -17,19 +15,27 @@ class AutoRefresh extends StatefulWidget {
 
 class _AutoRefreshState extends State<AutoRefresh>{
 
+  Duration lastTime = Duration.zero;
+  double dt = 0.0;
+
   @override
   Widget build(BuildContext context) {
-    return widget.widgetGenerator();
+    return widget.widgetGenerator(dt);
+  }
+
+  void tick(Duration elapsed){
+    setState(() {
+      Duration diff = elapsed - lastTime;
+      lastTime = elapsed;
+      dt = diff.inMilliseconds / 1000.0;
+    });
+
   }
 
   @override
   void initState() {
     super.initState();
-    var duration = Duration(milliseconds: 1000 ~/ widget.refreshRate);
-    Timer.periodic(duration, (timer) {
-      setState(() {});
-    });
-
+    Ticker(tick).start();
   }
 
 

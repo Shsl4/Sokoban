@@ -1,12 +1,52 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:typed_data';
+import 'package:sokoban/ui/animator.dart';
+import 'package:sokoban/game/level.dart';
+import 'package:sokoban/utilities/utilities.dart';
 import 'dart:ui' as ui;
 import 'dart:async';
-import 'level.dart';
-import 'game.dart';
+
+class SpriteSequence {
+
+  List<ui.Image> images = [];
+
+  SpriteSequence();
+
+  void loadAll(List<String> files) async {
+
+    for(var str in files){
+      images.add(await Resources._loadImage('assets/sprites/$str'));
+    }
+
+  }
+
+}
+
+class SpriteSequenceAnimator extends Animator {
+
+  SpriteSequence seq;
+  double _current = 0.0;
+
+  SpriteSequenceAnimator(this.seq, double duration){
+    setDuration(duration);
+  }
+
+  ui.Image currentFrame(){
+    return seq.images[_current.floor()];
+  }
+
+  void updateSequence(SpriteSequence s){
+    stop();
+    seq = s;
+  }
+
+  @override
+  void process(double deltaTime) {
+    _current = Utilities.lerpd(0.0, (seq.images.length - 1).toDouble(), Utilities.spike(progress()));
+  }
+
+}
 
 class Resources {
 
@@ -14,7 +54,7 @@ class Resources {
 
   Resources._internal();
 
-  factory Resources(){
+  static Resources instance(){
     return _instance;
   }
 
@@ -24,10 +64,11 @@ class Resources {
     return _loaded;
   }
 
-  ui.Image? _playerRight0;
-  ui.Image? _playerLeft0;
-  ui.Image? _playerTop0;
-  ui.Image? _playerDown0;
+  final SpriteSequence _playerRight = SpriteSequence();
+  final SpriteSequence _playerLeft = SpriteSequence();
+  final SpriteSequence _playerUp = SpriteSequence();
+  final SpriteSequence _playerDown = SpriteSequence();
+
   ui.Image? _box;
   ui.Image? _ground;
   ui.Image? _wall;
@@ -40,10 +81,11 @@ class Resources {
 
     if(valid()) return;
 
-    _playerRight0 = await _loadImage('assets/sprites/droite_0.png');
-    _playerLeft0 = await _loadImage('assets/sprites/gauche_0.png');
-    _playerTop0 = await _loadImage('assets/sprites/haut_0.png');
-    _playerDown0 = await _loadImage('assets/sprites/bas_0.png');
+    _playerRight.loadAll(["droite_0.png", "droite_1.png", "droite_2.png"]);
+    _playerLeft.loadAll(["gauche_0.png", "gauche_1.png", "gauche_2.png"]);
+    _playerUp.loadAll(["haut_0.png", "haut_1.png", "haut_2.png"]);
+    _playerDown.loadAll(["bas_0.png", "bas_1.png", "bas_2.png"]);
+
     _box = await _loadImage('assets/sprites/caisse.png');
     _ground = await _loadImage('assets/sprites/sol.png');
     _wall = await _loadImage('assets/sprites/bloc.png');
@@ -69,20 +111,20 @@ class Resources {
     return index >= 0 && index < _levels.length;
   }
 
-  ui.Image playerRight() {
-    return _playerRight0!;
+  SpriteSequence playerRight() {
+    return _playerRight;
   }
 
-  ui.Image playerLeft() {
-    return _playerLeft0!;
+  SpriteSequence playerLeft() {
+    return _playerLeft;
   }
 
-  ui.Image playerTop() {
-    return _playerTop0!;
+  SpriteSequence playerUp() {
+    return _playerUp;
   }
 
-  ui.Image playerDown() {
-    return _playerDown0!;
+  SpriteSequence playerDown() {
+    return _playerDown;
   }
 
   ui.Image boxTexture() {
