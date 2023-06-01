@@ -22,6 +22,7 @@ class _GameViewState extends State<GameView>{
   Game game = Game();
   int currentLevel = 0;
   bool paused = false;
+  bool levelFinished = false;
   double _scaleFactor = 1.0;
   double _baseScaleFactor = 1.0;
 
@@ -52,7 +53,9 @@ class _GameViewState extends State<GameView>{
 
   void reloadLevel(){
     game.loadLevel(currentLevel);
-    setState((){});
+    setState((){
+      levelFinished = false;
+    });
   }
 
   void onScaleStart(ScaleStartDetails details){
@@ -65,13 +68,16 @@ class _GameViewState extends State<GameView>{
     LevelPainter.camera.setScale(_scaleFactor);
   }
 
-  void receiveOp(Operations op){
+
+
+  void move(Operations op){
 
     game.applyMove(op);
 
     if(game.checkWin()){
-      currentLevel++;
-      reloadLevel();
+      setState((){
+        levelFinished = true;
+      });
     }
 
   }
@@ -89,19 +95,19 @@ class _GameViewState extends State<GameView>{
     if(event is RawKeyDownEvent && !event.repeat){
 
       if(event.logicalKey.keyLabel == 'Arrow Down'){
-        receiveOp(Operations.down);
+        move(Operations.down);
       }
 
       if(event.logicalKey.keyLabel == 'Arrow Up'){
-        receiveOp(Operations.up);
+        move(Operations.up);
       }
 
       if(event.logicalKey.keyLabel == 'Arrow Left'){
-        receiveOp(Operations.left);
+        move(Operations.left);
       }
 
       if(event.logicalKey.keyLabel == 'Arrow Right'){
-        receiveOp(Operations.right);
+        move(Operations.right);
       }
 
       if(event.logicalKey.keyLabel == 'R'){
@@ -114,11 +120,6 @@ class _GameViewState extends State<GameView>{
 
       if(event.logicalKey.keyLabel == 'Escape'){
         pauseMenu(!paused);
-      }
-
-      if(game.checkWin()){
-        currentLevel++;
-        reloadLevel();
       }
 
     }
@@ -147,7 +148,7 @@ class _GameViewState extends State<GameView>{
         )
     ));
 
-    display.add(TapView(receiveOp, () => pauseMenu(true)));
+    display.add(TapView(move, () => pauseMenu(true)));
 
     display.add(Align(
         alignment: Alignment.bottomRight,
@@ -169,13 +170,30 @@ class _GameViewState extends State<GameView>{
         )
     ));
 
+    if(levelFinished){
+
+      display.add(OverlayMenu(
+          title: 'Level finished!',
+          leftButtonAction: null,
+          leftButtonText: 'Menu',
+          rightButtonText: 'Next level',
+          rightButtonAction: () => {
+            currentLevel++,
+            reloadLevel()
+          })
+      );
+
+      return display;
+
+    }
+
     if(paused){
 
       display.add(OverlayMenu(
           title: 'Paused',
           leftButtonAction: () => pauseMenu(false),
           leftButtonText: 'Continue',
-          rightButtonText: 'Exit',
+          rightButtonText: 'Menu',
           rightButtonAction: null)
       );
 

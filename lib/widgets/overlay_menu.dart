@@ -31,7 +31,8 @@ class OverlayMenu extends StatelessWidget {
                     Text(title,
                         style: const TextStyle(
                             color: Colors.red,
-                            decoration: TextDecoration.none
+                            decoration: TextDecoration.none,
+                            fontSize: 35
                         )),
                     const Spacer(),
                     buttonRow(),
