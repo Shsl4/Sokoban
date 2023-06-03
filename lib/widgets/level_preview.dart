@@ -26,7 +26,7 @@ class LevelPreview extends StatelessWidget {
             )),
         const Spacer(),
         Expanded(
-          flex: 8,
+          flex: 6,
             child: CustomPaint(
               painter: LevelPreviewPainter(levelId),
               child: Container(

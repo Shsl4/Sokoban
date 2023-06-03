@@ -130,7 +130,7 @@ class _GameViewState extends State<GameView>{
             painter: LevelPainter(dt),
             child: Container(color: Colors.transparent)),
         Container(
-          margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+          margin: const EdgeInsets.fromLTRB(10, 10, 0, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -172,7 +172,7 @@ class _GameViewState extends State<GameView>{
     display.add(Align(
         alignment: Alignment.bottomRight,
         child: Container(
-          padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 0.0),
+          padding: const EdgeInsets.fromLTRB(0, 0, 10, 10),
           child: SokobanButton(
               size: const Size(50, 50),
               onLongPress: () => game.reset(),

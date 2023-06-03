@@ -118,24 +118,24 @@ class _SokobanAppState extends State<SokobanApp>{
               SafeArea(child: selectWidget()),
               SafeArea(child: Align(
                 alignment: Alignment.bottomLeft,
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                      child: SokobanButton(
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
+                  child: Row(
+                    children: [
+                      SokobanButton(
                           onPressed: () => setState(() => Audio.toggleMuteEffects()),
                           size: const Size(50, 50),
                           filled: false,
                           child: Icon(Audio.effectsMuted() ? Icons.volume_off : Icons.volume_up)
                       ),
-                    ),
-                    SokobanButton(
-                        onPressed: () => setState(() => Audio.toggleMuteMusic()),
-                        size: const Size(50, 50),
-                        filled: false,
-                        child: Icon(Audio.musicMuted() ? Icons.music_off : Icons.music_note)
-                    )
-                  ],
+                      SokobanButton(
+                          onPressed: () => setState(() => Audio.toggleMuteMusic()),
+                          size: const Size(50, 50),
+                          filled: false,
+                          child: Icon(Audio.musicMuted() ? Icons.music_off : Icons.music_note)
+                      )
+                    ],
+                  ),
                 ),
               ))
             ],
