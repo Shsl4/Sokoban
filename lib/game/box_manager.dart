@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:sokoban/game/vector2d.dart';
 import 'package:sokoban/ui/animator.dart';
-import 'package:sokoban/ui/resources.dart';
+import 'package:sokoban/game/resources.dart';
 import 'package:sokoban/utilities/utilities.dart';
 
 class BoxManager {

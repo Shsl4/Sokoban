@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:sokoban/widgets/sokoban_button.dart';
 
 class OverlayMenu extends StatelessWidget {
 
   final String title;
   final String leftButtonText;
   final Function()? leftButtonAction;
-  final String rightButtonText;
+  final String? rightButtonText;
   final Function()? rightButtonAction;
 
-  const OverlayMenu({super.key, required this.title, required this.leftButtonText, this.leftButtonAction, required this.rightButtonText, this.rightButtonAction});
+  const OverlayMenu({super.key, required this.title, required this.leftButtonText, this.leftButtonAction, this.rightButtonText, this.rightButtonAction});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class OverlayMenu extends StatelessWidget {
                 width: 350,
                 height: 200,
                 decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red, width: 3),
+                    border: Border.all(color: Colors.blue, width: 3),
                     color: Colors.transparent,
                     borderRadius: const BorderRadius.all(Radius.circular(15))),
                 child: Column(
@@ -30,7 +31,7 @@ class OverlayMenu extends StatelessWidget {
                     const Spacer(),
                     Text(title,
                         style: const TextStyle(
-                            color: Colors.red,
+                            color: Colors.blue,
                             decoration: TextDecoration.none,
                             fontSize: 35
                         )),
@@ -49,29 +50,38 @@ class OverlayMenu extends StatelessWidget {
 
   Widget buttonRow() {
     return Row(
-      children: [
-        const Spacer(),
-        ElevatedButton(
-          onPressed: leftButtonAction,
-          style: ButtonStyle(
-            minimumSize: const MaterialStatePropertyAll<Size>(Size(125, 40)),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-          ),
-          child: Text(leftButtonText),
-        ),
-        const Spacer(),
-        ElevatedButton(
-          onPressed: rightButtonAction,
-          style: ButtonStyle(
-            minimumSize: const MaterialStatePropertyAll<Size>(Size(125, 40)),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-          ),
-          child: Text(rightButtonText),
-        ),
-        const Spacer()
-      ],
+      children: buttons()
     );
   }
+
+  List<Widget> buttons() {
+
+    List<Widget> widgets = [];
+
+    widgets.add(const Spacer());
+
+    widgets.add(SokobanButton(
+        size: const Size(125, 40),
+        onPressed: leftButtonAction,
+        child: Text(leftButtonText)
+    ));
+
+    widgets.add(const Spacer());
+
+    if(rightButtonText != null){
+
+      widgets.add(SokobanButton(
+          size: const Size(125, 40),
+          onPressed: rightButtonAction,
+          child: Text(rightButtonText!)
+      ));
+
+      widgets.add(const Spacer());
+
+    }
+
+    return widgets;
+
+  }
+
 }

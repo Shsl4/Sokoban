@@ -3,14 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:sokoban/game/game.dart';
 import 'package:sokoban/game/vector2d.dart';
 import 'package:sokoban/ui/level_painter.dart';
-import 'package:sokoban/ui/resources.dart';
+import 'package:sokoban/game/resources.dart';
+import 'package:sokoban/utilities/audio.dart';
 import 'package:sokoban/widgets/autorefresh.dart';
 import 'package:sokoban/widgets/overlay_menu.dart';
 import 'package:sokoban/widgets/tap_view.dart';
 
 class GameView extends StatefulWidget{
 
-  const GameView({Key? key}) : super(key: key);
+  final Function() onMenu;
+
+  const GameView({Key? key, required this.onMenu}) : super(key: key);
 
   @override
   State<GameView> createState() => _GameViewState();
@@ -19,28 +22,20 @@ class GameView extends StatefulWidget{
 
 class _GameViewState extends State<GameView>{
 
-  Game game = Game();
-  int currentLevel = 0;
+  Game game = Game.instance();
   bool paused = false;
   bool levelFinished = false;
   double _scaleFactor = 1.0;
   double _baseScaleFactor = 1.0;
 
-  _GameViewState() {
-    Resources.instance().load().then((value) => {
-      game.readState().then((value) => {
-        if(!value){
-          reloadLevel()
-        }
-      })
-    });
-  }
+  _GameViewState();
 
   @override
   Widget build(BuildContext context) {
 
     return Listener(
         child: RawKeyboardListener(
+            autofocus: true,
             focusNode: FocusNode(),
             onKey: onKey,
             child: Stack(
@@ -52,7 +47,7 @@ class _GameViewState extends State<GameView>{
   }
 
   void reloadLevel(){
-    game.loadLevel(currentLevel);
+    game.reset();
     setState((){
       levelFinished = false;
     });
@@ -68,13 +63,12 @@ class _GameViewState extends State<GameView>{
     LevelPainter.camera.setScale(_scaleFactor);
   }
 
-
-
   void move(Operations op){
 
     game.applyMove(op);
 
     if(game.checkWin()){
+      Audio.playEffect(Resources.instance().completeSound);
       setState((){
         levelFinished = true;
       });
@@ -91,6 +85,8 @@ class _GameViewState extends State<GameView>{
   }
 
   void onKey(RawKeyEvent event){
+
+    if(levelFinished) return;
 
     if(event is RawKeyDownEvent && !event.repeat){
 
@@ -127,9 +123,31 @@ class _GameViewState extends State<GameView>{
   }
 
   Widget generatePainter(double dt){
-    return CustomPaint(
-        painter: LevelPainter(dt),
-        child: Container()
+    return Stack(
+      children: [
+        CustomPaint(
+            painter: LevelPainter(dt),
+            child: Container()),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Moves: ${game.moves.length}",
+              style: const TextStyle(
+                color: Colors.black54,
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              )
+            ),
+            Text("Undos: ${game.undos}",
+              style: const TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0
+              )
+            )
+          ],
+        )
+      ],
     );
   }
 
@@ -161,7 +179,7 @@ class _GameViewState extends State<GameView>{
                 borderRadius: BorderRadius.circular(12), // <-- Radius
               )),
               minimumSize: const MaterialStatePropertyAll<Size>(Size(75, 75)),
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+              foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
               backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
               shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
               overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
@@ -172,16 +190,39 @@ class _GameViewState extends State<GameView>{
 
     if(levelFinished){
 
-      display.add(OverlayMenu(
-          title: 'Level finished!',
-          leftButtonAction: null,
-          leftButtonText: 'Menu',
-          rightButtonText: 'Next level',
-          rightButtonAction: () => {
-            currentLevel++,
-            reloadLevel()
-          })
-      );
+      if(game.loadedLevelIndex() + 1 == Resources.instance().levelCount()){
+
+        display.add(OverlayMenu(
+            title: 'All levels finished!',
+            leftButtonAction: () {
+              game.unloadLevel();
+              widget.onMenu();
+            },
+            leftButtonText: 'Menu',
+            rightButtonText: null,
+            rightButtonAction: null
+        ));
+
+      }
+      else{
+
+        display.add(OverlayMenu(
+            title: 'Level finished!',
+            leftButtonAction: () {
+              game.unloadLevel();
+              widget.onMenu();
+            },
+            leftButtonText: 'Menu',
+            rightButtonText: 'Next level',
+            rightButtonAction: () {
+              game.loadNextLevel();
+              setState(() {
+                levelFinished = false;
+              });
+            })
+        );
+
+      }
 
       return display;
 
@@ -194,7 +235,10 @@ class _GameViewState extends State<GameView>{
           leftButtonAction: () => pauseMenu(false),
           leftButtonText: 'Continue',
           rightButtonText: 'Menu',
-          rightButtonAction: null)
+          rightButtonAction: () {
+            game.unloadLevel();
+            widget.onMenu();
+          })
       );
 
     }

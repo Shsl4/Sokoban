@@ -15,12 +15,21 @@ class AutoRefresh extends StatefulWidget {
 
 class _AutoRefreshState extends State<AutoRefresh>{
 
+  Ticker? ticker;
   Duration lastTime = Duration.zero;
   double dt = 0.0;
 
   @override
   Widget build(BuildContext context) {
     return widget.widgetGenerator(dt);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if(ticker != null){
+      ticker!.stop();
+    }
   }
 
   void tick(Duration elapsed){
@@ -35,7 +44,8 @@ class _AutoRefreshState extends State<AutoRefresh>{
   @override
   void initState() {
     super.initState();
-    Ticker(tick).start();
+    ticker = Ticker(tick);
+    ticker!.start();
   }
 
 

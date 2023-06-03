@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:sokoban/game/game.dart';
 import 'package:sokoban/game/level.dart';
-import 'package:sokoban/ui/resources.dart';
+import 'package:sokoban/game/resources.dart';
 import 'package:sokoban/ui/particle.dart';
 import 'package:sokoban/ui/camera.dart';
 
 class LevelPainter extends CustomPainter {
 
-  static final Game game = Game();
+  static final Game game = Game.instance();
   static final Resources resources = Resources.instance();
   static final Camera camera = Camera();
-  static final Paint backPaint = Paint()..color = Colors.black;
+  static final Paint backPaint = Paint()..color = Colors.black..isAntiAlias = true;
   static final ParticleManager particleManager = ParticleManager(100);
   static final SpriteSequenceAnimator playerAnim = SpriteSequenceAnimator(resources.playerRight(), 0.25);
 
@@ -21,13 +21,17 @@ class LevelPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), backPaint);
+    Rect srcRect = const Rect.fromLTWH(0, 0, 1024, 1024);
+    Rect destRect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    canvas.drawImageRect(resources.backgroundForest(), srcRect, destRect, backPaint);
 
     if(!game.levelLoaded()) return;
 
     playerAnim.update(dt);
-    particleManager.paint(canvas, size);
+    particleManager.paint(canvas, size, dt);
     camera.translateView(canvas, size, dt);
+
     drawTiles(canvas);
 
   }
@@ -48,7 +52,7 @@ class LevelPainter extends CustomPainter {
         Rect destRect = Rect.fromLTWH(50.0 * x, 50.0 * y, 50, 50);
 
         if(tile != TileType.empty && tile != TileType.hole){
-          canvas.drawImageRect(resources.groundTexture(), srcRect, destRect, Paint());
+          canvas.drawImageRect(resources.groundTexture(), srcRect, destRect, backPaint);
         }
 
         switch(tile){
@@ -60,15 +64,15 @@ class LevelPainter extends CustomPainter {
             break;
 
           case TileType.wall:
-            canvas.drawImageRect(resources.wallTexture(), srcRect, destRect, Paint());
+            canvas.drawImageRect(resources.wallTexture(), srcRect, destRect, backPaint);
             break;
 
           case TileType.target:
-            canvas.drawImageRect(resources.targetTexture(), srcRect, destRect, Paint());
+            canvas.drawImageRect(resources.targetTexture(), srcRect, destRect, backPaint);
             break;
 
           case TileType.hole:
-            canvas.drawImageRect(resources.holeTexture(), srcRect, destRect, Paint());
+            canvas.drawImageRect(resources.holeTexture(), srcRect, destRect, backPaint);
             break;
 
         }

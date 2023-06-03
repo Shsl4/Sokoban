@@ -35,9 +35,6 @@ class Level {
 
         switch (type){
 
-          case ' ':
-            break;
-
           case '\$':
             tiles[x] = TileType.box;
             boxStarts.add(Vector2d(x.toDouble(), y.toDouble()));
@@ -58,12 +55,8 @@ class Level {
             targetPositions.add(Vector2d(x.toDouble(), y.toDouble()));
             break;
 
-          case '*':
-            tiles[x] = TileType.hole;
-            break;
-
           default:
-            throw Exception('Unexpected symbol: $type');
+            break;
 
         }
 

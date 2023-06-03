@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sokoban/game/box_manager.dart';
 import 'package:sokoban/game/level.dart';
 import 'package:sokoban/game/vector2d.dart';
 import 'package:sokoban/ui/level_painter.dart';
-import 'package:sokoban/ui/resources.dart';
+import 'package:sokoban/game/resources.dart';
+import 'package:sokoban/utilities/audio.dart';
 
 enum Operations{
   none,
@@ -36,55 +38,63 @@ class Move {
 
 class Game {
 
-  int levelIndex = -1;
+  int _levelIndex = -1;
   Function()? moveCallback;
   List<Move> moves = [];
   BoxManager boxManager = BoxManager();
   Vector2d _playerPosition = Vector2d.zero;
   Level? _currentState;
+  int undos = 0;
 
   static final _instance = Game._internal();
 
-  Game._internal(){
-  }
+  Game._internal();
 
-  factory Game() { return _instance; }
+  static Game instance() { return _instance; }
 
-  bool loadLevel(int index){
+  void loadLevel(int index){
 
-    try{
+    _currentState = Resources.instance().level(index);
+    _playerPosition = Vector2d(_currentState!.playerStart.x, _currentState!.playerStart.y);
+    boxManager.setup(List.from(_currentState!.boxStarts));
+    _levelIndex = index;
+    moves = [];
+    undos = 0;
 
-      _currentState = Resources.instance().level(index);
-      _playerPosition = Vector2d(_currentState!.playerStart.x, _currentState!.playerStart.y);
-      boxManager.setup(List.from(_currentState!.boxStarts));
-      levelIndex = index;
-      moves = [];
+    LevelPainter.camera.updatePosition();
 
-      if(moveCallback != null){
-        moveCallback!();
-      }
-
+    if(moveCallback != null){
+      moveCallback!();
     }
-    catch(e){
-      return false;
-    }
-
-    return true;
 
   }
 
   void unloadLevel(){
 
+    if(checkWin()){
+      int s = _levelIndex + 1;
+      _clear();
+      _levelIndex = s;
+    }
+
+    writeState().then((value) {
+      _clear();
+    });
+
+  }
+
+  void _clear(){
+
     _currentState = null;
     _playerPosition = Vector2d.zero;
     boxManager.reset();
-    levelIndex = -1;
     moves = [];
+    _levelIndex = -1;
 
   }
 
   void reset(){
-    loadLevel(levelIndex);
+    loadLevel(_levelIndex);
   }
 
   TileType tile(Vector2d v){
@@ -168,11 +178,24 @@ class Game {
       moveCallback!();
     }
 
+    Audio.playEffect(push ? Resources.instance().moveBoxSound : Resources.instance().randomMoveSound());
+
     LevelPainter.notifyMove(op);
 
-    writeState();
+    // Save every 20 moves
+    if((moves.length + undos) % 20 == 0){
+      writeState();
+    }
 
     return true;
+
+  }
+
+  void loadNextLevel(){
+
+    _levelIndex++;
+    loadLevel(_levelIndex);
+    writeState();
 
   }
 
@@ -207,6 +230,15 @@ class Game {
     }
 
     LevelPainter.notifyMove(move.op);
+
+    Audio.playEffect(move.push ? Resources.instance().moveBoxSound : Resources.instance().randomMoveSound());
+
+    undos++;
+
+    // Save every 20 moves
+    if((moves.length + undos) % 20 == 0){
+      writeState();
+    }
 
     return true;
 
@@ -249,13 +281,27 @@ class Game {
     final file = await _saveFile;
 
     Map<String, dynamic> sv = {
-      "level": levelIndex,
+      "level": _levelIndex,
       "playerPosition": _playerPosition,
       "boxes": boxManager.asList(),
       "moves": moves
     };
 
     return file.writeAsString(jsonEncode(sv));
+
+  }
+
+
+  Future<bool> saveExists() async {
+
+    try{
+      await _saveFile;
+      return true;
+    }
+    catch(e){
+      return false;
+    }
+
 
   }
 
@@ -271,18 +317,28 @@ class Game {
       var mvs = contents["moves"];
 
       loadLevel(contents["level"]);
-      _playerPosition = Vector2d.fromJson(contents["playerPosition"]);
-      boxManager.setup(List<Vector2d>.from(boxes.map((obj) => Vector2d.fromJson(obj))));
-      moves = List<Move>.from(mvs.map((obj) => Move.fromJson(obj)));
+
+      if(!boxes.isEmpty){
+        _playerPosition = Vector2d.fromJson(contents["playerPosition"]);
+        boxManager.setup(List<Vector2d>.from(boxes.map((obj) => Vector2d.fromJson(obj))));
+        moves = List<Move>.from(mvs.map((obj) => Move.fromJson(obj)));
+      }
+
+      LevelPainter.camera.updatePosition();
 
       return true;
 
     } catch(e) {
 
+      loadLevel(0);
       return false;
 
     }
 
+  }
+
+  int loadedLevelIndex(){
+    return _levelIndex;
   }
 
 }

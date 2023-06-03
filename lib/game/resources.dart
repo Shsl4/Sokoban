@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sokoban/ui/animator.dart';
@@ -69,11 +70,30 @@ class Resources {
   final SpriteSequence _playerUp = SpriteSequence();
   final SpriteSequence _playerDown = SpriteSequence();
 
+  final AssetSource hoverSound = AssetSource('audio/hover.mp3');
+
+  final List<AssetSource> moveSounds = [
+    AssetSource('audio/move_1.mp3'),
+    AssetSource('audio/move_2.mp3'),
+    AssetSource('audio/move_3.mp3'),
+    AssetSource('audio/move_4.mp3')
+  ];
+
+  final AssetSource moveBoxSound = AssetSource('audio/move_box.mp3');
+  final AssetSource selectSound = AssetSource('audio/select.mp3');
+  final AssetSource completeSound = AssetSource('audio/complete.mp3');
+  final AssetSource music = AssetSource('audio/crystal_clear_loop.mp3');
+
+  AssetSource randomMoveSound() {
+    return moveSounds[Utilities.random.nextInt(moveSounds.length)];
+  }
+
   ui.Image? _box;
   ui.Image? _ground;
   ui.Image? _wall;
   ui.Image? _hole;
   ui.Image? _target;
+  ui.Image? _background;
 
   final List<Level> _levels = [];
 
@@ -91,6 +111,7 @@ class Resources {
     _wall = await _loadImage('assets/sprites/bloc.png');
     _hole = await _loadImage('assets/sprites/trou.png');
     _target = await _loadImage('assets/sprites/cible.png');
+    _background = await _loadImage('assets/sprites/background.png');
 
     var levelData = await _loadJson('assets/levels.json');
 
@@ -147,9 +168,17 @@ class Resources {
     return _target!;
   }
 
-  static Future<ui.Image> _loadImage(String fichier) async {
+  ui.Image backgroundForest() {
+    return _background!;
+  }
 
-    ExactAssetImage assetImage = ExactAssetImage(fichier);
+  int levelCount() {
+    return _levels.length;
+  }
+
+  static Future<ui.Image> _loadImage(String file) async {
+
+    ExactAssetImage assetImage = ExactAssetImage(file);
 
     AssetBundleImageKey key = await assetImage.obtainKey(const ImageConfiguration());
 

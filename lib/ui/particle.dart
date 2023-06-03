@@ -5,15 +5,15 @@ class Particle {
 
   static final Paint p = Paint()..color = Colors.white;
   double radius = Utilities.randomDouble(1.0, 10.0, 2);
-  double speed = Utilities.randomDouble(0.1, 5.0, 2);
+  double speed = Utilities.randomDouble(50.0, 500.0, 2);
   Offset pos;
 
   Particle(this.pos);
 
-  void paint(Canvas canvas, Size size){
+  void paint(Canvas canvas, Size size, double dt){
 
     canvas.drawCircle(pos, radius, p);
-    pos = pos.translate(0.0, -speed);
+    pos = pos.translate(0.0, -speed * dt);
 
     if(pos.dy <= -10.0){
       pos = pos.translate(0.0, size.height + 50.0);
@@ -36,10 +36,10 @@ class ParticleManager {
 
   }
 
-  void paint(Canvas canvas, Size size){
+  void paint(Canvas canvas, Size size, double dt){
 
     for(var particle in particles){
-      particle.paint(canvas, size);
+      particle.paint(canvas, size, dt);
     }
 
   }
