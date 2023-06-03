@@ -15,7 +15,7 @@ class OverlayMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(color: const Color.fromARGB(200, 0, 0, 0)),
+        Container(color: Colors.transparent),
         Center(
           child: Stack(
             children: [
@@ -24,8 +24,9 @@ class OverlayMenu extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.blue, width: 3),
-                    color: Colors.transparent,
-                    borderRadius: const BorderRadius.all(Radius.circular(15))),
+                    color: Colors.black54,
+                    borderRadius: const BorderRadius.all(Radius.circular(15))
+                ),
                 child: Column(
                   children: [
                     const Spacer(),

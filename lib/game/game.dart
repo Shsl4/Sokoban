@@ -284,7 +284,8 @@ class Game {
       "level": _levelIndex,
       "playerPosition": _playerPosition,
       "boxes": boxManager.asList(),
-      "moves": moves
+      "moves": moves,
+      "undos": undos
     };
 
     return file.writeAsString(jsonEncode(sv));
@@ -322,6 +323,7 @@ class Game {
         _playerPosition = Vector2d.fromJson(contents["playerPosition"]);
         boxManager.setup(List<Vector2d>.from(boxes.map((obj) => Vector2d.fromJson(obj))));
         moves = List<Move>.from(mvs.map((obj) => Move.fromJson(obj)));
+        undos = contents["undos"];
       }
 
       LevelPainter.camera.updatePosition();

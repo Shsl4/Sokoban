@@ -16,21 +16,23 @@ class LevelPreview extends StatelessWidget {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Spacer(flex: 4),
+        const Spacer(),
         Text('Level ${levelId + 1}',
             style: const TextStyle(
                 fontSize: 35
             )),
         const Spacer(),
-        CustomPaint(
-          painter: LevelPreviewPainter(levelId),
-          child: Container(
-            height: 300,
-            width: 400,
-            color: Colors.transparent,
-          ),
+        Expanded(
+          flex: 8,
+            child: CustomPaint(
+              painter: LevelPreviewPainter(levelId),
+              child: Container(
+                color: Colors.transparent,
+              ),
+            )
         ),
         const Spacer(),
         SokobanButton(
@@ -38,7 +40,7 @@ class LevelPreview extends StatelessWidget {
             size: const Size(250, 50),
             child: const Text('Start')
         ),
-        const Spacer(flex: 4)
+        const Spacer(),
       ],
     );
 

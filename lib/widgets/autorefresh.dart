@@ -3,10 +3,9 @@ import 'package:flutter/scheduler.dart';
 
 class AutoRefresh extends StatefulWidget {
 
-  final int refreshRate;
   final Widget Function(double) widgetGenerator;
 
-  const AutoRefresh({super.key, required this.refreshRate, required this.widgetGenerator});
+  const AutoRefresh({super.key, required this.widgetGenerator});
 
   @override
   State<StatefulWidget> createState() => _AutoRefreshState();

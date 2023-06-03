@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:sokoban/game/game.dart';
 import 'package:sokoban/game/level.dart';
@@ -16,15 +18,13 @@ class LevelPainter extends CustomPainter {
 
   final double dt;
 
+  static final Rect srcRect = const Rect.fromLTWH(0, 0, 128, 128);
+
+
   LevelPainter(this.dt);
 
   @override
   void paint(Canvas canvas, Size size) {
-
-    Rect srcRect = const Rect.fromLTWH(0, 0, 1024, 1024);
-    Rect destRect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-    canvas.drawImageRect(resources.backgroundForest(), srcRect, destRect, backPaint);
 
     if(!game.levelLoaded()) return;
 
@@ -32,13 +32,35 @@ class LevelPainter extends CustomPainter {
     particleManager.paint(canvas, size, dt);
     camera.translateView(canvas, size, dt);
 
-    drawTiles(canvas);
+    // Render the tiles on a separate canvas then draw the rendered image on
+    // the original canvas. This is done to prevent small lines from appearing
+    // in between tiles due to decimal point imprecision when translating or
+    // scaling the camera.
+    final recorder = PictureRecorder();
+    Canvas tileCanvas = Canvas(recorder);
+
+    // Draw the tiles on the new canvas
+    drawTiles(tileCanvas);
+
+    // Calculate the image size
+    Size sz = Size(game.level().width * 50, game.level().height * 50);
+
+    // Convert to an image
+    var tiles = recorder.endRecording().toImageSync(sz.width.toInt(), sz.height.toInt());
+
+    // Draw the rendered picture onto the original canvas
+    canvas.drawImage(tiles, Offset.zero, backPaint);
+
+    // Draw the boxes
+    game.boxManager.renderBoxes(canvas, dt);
+
+    // Draw the character
+    Rect destRect = Rect.fromLTWH(camera.renderPosition.x * 50.0, camera.renderPosition.y * 50.0, 50, 50);
+    canvas.drawImageRect(playerAnim.currentFrame(), srcRect, destRect, Paint());
 
   }
 
   void drawTiles(Canvas canvas){
-
-    Rect srcRect = const Rect.fromLTWH(0, 0, 128, 128);
 
     Level level = game.level();
 
@@ -86,11 +108,6 @@ class LevelPainter extends CustomPainter {
       x = 0;
 
     }
-
-    game.boxManager.renderBoxes(canvas, dt);
-
-    Rect destRect = Rect.fromLTWH(camera.renderPosition.x * 50.0, camera.renderPosition.y * 50.0, 50, 50);
-    canvas.drawImageRect(playerAnim.currentFrame(), srcRect, destRect, Paint());
 
   }
 

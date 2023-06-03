@@ -1,9 +1,4 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:sokoban/game/game.dart';
-import 'package:sokoban/game/resources.dart';
-import 'package:sokoban/widgets/level_preview.dart';
 import 'package:sokoban/widgets/sokoban_button.dart';
 
 class ControlsMenu extends StatelessWidget{
@@ -33,8 +28,8 @@ class ControlsMenu extends StatelessWidget{
           child: Container(
           padding: const EdgeInsets.all(10.0),
           width: 400,
-            child: const Column(
-              children: [
+            child: Column(
+              children: const [
                 Spacer(flex: 6),
                 Text('Controls', style: titleStyle),
                 Spacer(flex: 2),

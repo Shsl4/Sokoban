@@ -81,7 +81,7 @@ class Camera extends Animator {
     canvas.scale(_scale);
 
     Vector2d center = (Vector2d(size.width / 2.0 / _scale, size.height / 2.0 / _scale));
-    Vector2d offset = Utilities.roundUpVec(center, 50) - renderPosition * 50.0 + _viewOffset;
+    Vector2d offset = center - renderPosition * 50.0 + _viewOffset;
 
     canvas.translate(offset.x, offset.y);
 

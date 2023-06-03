@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:sokoban/game/level.dart';
@@ -21,7 +22,7 @@ class LevelPreviewPainter extends CustomPainter {
     double boxDim;
     Size offset;
 
-    boxDim = min(size.width, size.height) / max(level.width, level.height);
+    boxDim = double.parse((min(size.width, size.height) / max(level.width, level.height)).toStringAsFixed(1));
 
     offset = Size((size.width - boxDim * level.width) / 2.0, (size.height - boxDim * level.height) / 2.0);
 

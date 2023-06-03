@@ -7,6 +7,7 @@ import 'package:sokoban/game/resources.dart';
 import 'package:sokoban/utilities/audio.dart';
 import 'package:sokoban/widgets/autorefresh.dart';
 import 'package:sokoban/widgets/overlay_menu.dart';
+import 'package:sokoban/widgets/sokoban_button.dart';
 import 'package:sokoban/widgets/tap_view.dart';
 
 class GameView extends StatefulWidget{
@@ -127,25 +128,28 @@ class _GameViewState extends State<GameView>{
       children: [
         CustomPaint(
             painter: LevelPainter(dt),
-            child: Container()),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Moves: ${game.moves.length}",
-              style: const TextStyle(
-                color: Colors.black54,
-                fontWeight: FontWeight.bold,
-                fontSize: 18.0,
+            child: Container(color: Colors.transparent)),
+        Container(
+          margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Moves: ${game.moves.length}",
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  )
+              ),
+              Text("Undos: ${game.undos}",
+                  style: const TextStyle(
+                      color: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0
+                  )
               )
-            ),
-            Text("Undos: ${game.undos}",
-              style: const TextStyle(
-                  color: Colors.black54,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0
-              )
-            )
-          ],
+            ],
+          ),
         )
       ],
     );
@@ -155,14 +159,11 @@ class _GameViewState extends State<GameView>{
 
     List<Widget> display = [];
 
-    display.add(Scaffold(
-        body: GestureDetector(
-            onScaleStart: onScaleStart,
-            onScaleUpdate: onScale,
-            child: AutoRefresh(
-                refreshRate: 60,
-                widgetGenerator: generatePainter
-            )
+    display.add(GestureDetector(
+        onScaleStart: onScaleStart,
+        onScaleUpdate: onScale,
+        child: AutoRefresh(
+            widgetGenerator: generatePainter
         )
     ));
 
@@ -170,21 +171,15 @@ class _GameViewState extends State<GameView>{
 
     display.add(Align(
         alignment: Alignment.bottomRight,
-        child: ElevatedButton(
-            onLongPress: () => game.reset(),
-            onPressed: () => game.undo(),
-            style: ButtonStyle(
-              splashFactory: NoSplash.splashFactory,
-              shape:MaterialStatePropertyAll(RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12), // <-- Radius
-              )),
-              minimumSize: const MaterialStatePropertyAll<Size>(Size(75, 75)),
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-              shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
-              overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
-            ),
-            child: const Icon(Icons.rotate_left)
+        child: Container(
+          padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 0.0),
+          child: SokobanButton(
+              size: const Size(50, 50),
+              onLongPress: () => game.reset(),
+              onPressed: () => game.undo(),
+              filled: false,
+              child: const Icon(Icons.rotate_left)
+          ),
         )
     ));
 
@@ -232,10 +227,10 @@ class _GameViewState extends State<GameView>{
 
       display.add(OverlayMenu(
           title: 'Paused',
-          leftButtonAction: () => pauseMenu(false),
-          leftButtonText: 'Continue',
-          rightButtonText: 'Menu',
-          rightButtonAction: () {
+          rightButtonAction: () => pauseMenu(false),
+          rightButtonText: 'Continue',
+          leftButtonText: 'Menu',
+          leftButtonAction: () {
             game.unloadLevel();
             widget.onMenu();
           })

@@ -7,13 +7,28 @@ class Audio {
   final AudioPlayer _effectPlayer = AudioPlayer(playerId: 'effects');
   final AudioPlayer _musicPlayer = AudioPlayer(playerId: 'music');
 
+  static const AudioContext context = AudioContext(
+      iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.soloAmbient,
+          options: [
+            AVAudioSessionOptions.allowBluetooth,
+            AVAudioSessionOptions.allowBluetoothA2DP,
+            AVAudioSessionOptions.allowAirPlay
+          ]
+      ),
+  );
+
   double _musicVolume = 0.5;
   double _effectsVolume = 0.25;
 
   Audio._init() {
+
+    AudioPlayer.global.setAudioContext(context);
+
     _effectPlayer.setVolume(_effectsVolume);
     _musicPlayer.setVolume(_musicVolume);
     _musicPlayer.setReleaseMode(ReleaseMode.loop);
+
   }
 
   static bool musicMuted() {

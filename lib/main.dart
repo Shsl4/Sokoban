@@ -34,9 +34,9 @@ class _SokobanAppState extends State<SokobanApp>{
   ViewTypes _viewType = ViewTypes.mainMenu;
 
   _SokobanAppState(){
-      Resources.instance().load().then((value) => setState((){
-        Audio.playMusic(Resources.instance().music);
-      }));
+    Resources.instance().load().then((value) => setState((){
+      Audio.playMusic(Resources.instance().music);
+    }));
   }
 
   Widget selectWidget() {
@@ -115,30 +115,29 @@ class _SokobanAppState extends State<SokobanApp>{
                 painter: BackgroundPainter(),
                 child: Container(),
               ),
-              selectWidget(),
-              Align(
+              SafeArea(child: selectWidget()),
+              SafeArea(child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                       child: SokobanButton(
                           onPressed: () => setState(() => Audio.toggleMuteEffects()),
                           size: const Size(50, 50),
+                          filled: false,
                           child: Icon(Audio.effectsMuted() ? Icons.volume_off : Icons.volume_up)
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      child: SokobanButton(
-                          onPressed: () => setState(() => Audio.toggleMuteMusic()),
-                          size: const Size(50, 50),
-                          child: Icon(Audio.musicMuted() ? Icons.music_off : Icons.music_note)
-                      ),
+                    SokobanButton(
+                        onPressed: () => setState(() => Audio.toggleMuteMusic()),
+                        size: const Size(50, 50),
+                        filled: false,
+                        child: Icon(Audio.musicMuted() ? Icons.music_off : Icons.music_note)
                     )
                   ],
                 ),
-              )
+              ))
             ],
           ),
         )
